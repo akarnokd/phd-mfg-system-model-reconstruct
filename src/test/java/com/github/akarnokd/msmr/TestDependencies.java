@@ -13,6 +13,7 @@ public class TestDependencies {
         assertEquals((Integer)1, Observable.just(1).toBlocking().first());
     }
 
+    @Test
     public void testLambda() {
         Runnable r = System.out::println;
         r.run();

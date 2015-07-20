@@ -9,5 +9,6 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/akarnokd_tools.jar" sourcepath="lib/akarnokd_tools.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
