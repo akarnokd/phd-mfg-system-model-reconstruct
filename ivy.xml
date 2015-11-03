@@ -33,5 +33,6 @@
         <dependency org="com.github.akarnokd" name="ixjava" rev="latest.[any status]">
             <exclude name="rxjava"/>
         </dependency>
+        <dependency org="com.github.akarnokd" name="akarnokd-xml" rev="latest.[any status]"/>
     </dependencies>
 </ivy-module>
