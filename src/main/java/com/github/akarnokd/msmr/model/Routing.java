@@ -32,7 +32,7 @@ public class Routing implements XSerializable, ShortID {
     
     @Override
     public void save(XElement xout) {
-        xout.set("id", "id");
+        xout.set("id", id);
         ShortIterator it = allOperationIds.iterator();
         while (it.hasNext()) {
             XElement xop = xout.add("operation");

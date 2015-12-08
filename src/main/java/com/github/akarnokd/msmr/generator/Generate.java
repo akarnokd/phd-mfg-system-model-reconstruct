@@ -1,9 +1,10 @@
 package com.github.akarnokd.msmr.generator;
 
-import java.util.Random;
+import java.util.*;
 
 import com.github.akarnokd.msmr.model.*;
 
+import hu.akarnokd.xml.XElement;
 import it.unimi.dsi.fastutil.shorts.*;
 
 public class Generate {
@@ -25,14 +26,17 @@ public class Generate {
     public int operationTimeScale;
     public int shiftLength;
     public int workingDayCount;
+    public int machineRedundancy;
+    public int reworkCount;
+    public int reworkMaxSteps;
     
     public void generate(Model model) {
 
         Random structureRandom = new Random(structureSeed);
         Random productRandom = new Random(productSeed);
 
-        short empId = 1;
         int shiftsPerDay = 24 / shiftLength;
+        short empId = 1;
         
         for (short i = 1; i <= stationCount; i++) {
             Station s = new Station();
@@ -109,6 +113,8 @@ public class Generate {
 
                 int t = (structureRandom.nextInt(operationMaxTime) + 1) * operationTimeScale;
                 m.operationTimes.put(opId, t);
+                
+                opId++;
             }
         }
 
@@ -133,11 +139,11 @@ public class Generate {
                     
                     int oidx = structureRandom.nextInt(os.size());
                     
-                    opId = os.get(oidx);
-                    ops.add(opId);
+                    short opId2 = os.get(oidx);
+                    ops.add(opId2);
                     
-                    r.allOperationIds.add(opId);
-                    r.allOperations.put(opId, model.operations.get(opId));
+                    r.allOperationIds.add(opId2);
+                    r.allOperations.put(opId2, model.operations.get(opId2));
                 }
                 
             }
@@ -159,11 +165,55 @@ public class Generate {
                 p1.outgoing.add(t1);
                 p2.incoming.add(t1);
             }
+            
+            for (int i = 0; i < reworkCount; i++) {
+                int steps = structureRandom.nextInt(reworkMaxSteps) + 1;
+                int offset = structureRandom.nextInt(ops.size() - steps) + steps;
+                
+                short op1 = ops.getShort(offset);
+                short op2 = ops.getShort(offset - steps);
+                
+                Operation p1 = model.operations.get(op1);
+                Operation p2 = model.operations.get(op2);
+                
+                Transition t1 = new Transition();
+                t1.from = p1;
+                t1.to = p2;
+                t1.fromId = op1;
+                t1.toId = op2;
+                t1.rework = true;
+                
+                p1.outgoing.add(t1);
+                p2.incoming.add(t1);
+            }
+        }
+        
+        List<Machine> ms = new ArrayList<>(model.machines.values());
+        
+        short machineId = (short)ms.size();
+        for (Machine m : ms) {
+            for (int i = 1; i <= machineRedundancy; i++) {
+                Machine m2 = m.copy();
+                m2.id = machineId;
+                
+                model.machines.put(machineId, m2);
+                
+                machineId++;
+            }
         }
         
         System.out.println("---");
         System.out.printf("Employees: %d%n", model.employees.size());
         model.stations.forEach((s, e) -> System.out.printf("%s: %s%n", s, e.employees));
+        
+        for (short j = 1; j <= productCount; j++) {
+            Product p = new Product();
+            p.id = j;
+            
+            p.type = (short)(productRandom.nextInt(routingCount) + 1);
+
+            model.products.add(p);
+        }
     }
     
     
@@ -174,6 +224,8 @@ public class Generate {
         g.machineCount = 50;
         g.routingCount = 1;
         g.operationCount = 40;
+        g.reworkCount = 3;
+        g.reworkMaxSteps = 2;
         g.sequentialMachineRatio = 0.3;
         g.batchMachineRatio = 0.3;
         g.employeeMaxCount = 3;
@@ -184,9 +236,15 @@ public class Generate {
         g.operationTimeScale = 60;
         g.shiftLength = 8;
         g.workingDayCount = 5;
+        g.machineRedundancy = 3;
         
         Model m = new Model();
         
         g.generate(m);
+        
+        XElement xml = new XElement("model");
+        m.save(xml);
+        
+        System.out.println(xml);
     }
 }

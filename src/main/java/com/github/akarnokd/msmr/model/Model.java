@@ -1,5 +1,6 @@
 package com.github.akarnokd.msmr.model;
 
+import java.util.*;
 import java.util.function.Supplier;
 
 import hu.akarnokd.xml.*;
@@ -16,6 +17,8 @@ public class Model implements XSerializable {
     public final Short2ObjectMap<Station> stations = new Short2ObjectOpenHashMap<>();
     
     public final Short2ObjectMap<Routing> routings = new Short2ObjectOpenHashMap<>();
+    
+    public final List<Product> products = new ArrayList<>();
     
     static <T extends XSerializable & ShortID> void load(XElement source, String groupName, 
             String itemName, Supplier<T> instance,
