@@ -10,7 +10,7 @@ public class Station implements XSerializable, ShortID {
     
     public final ShortSet employees = new ShortOpenHashSet(); 
     
-    public short currentEmployee;
+    public Employee currentEmployee;
     
     @Override
     public short id() {
@@ -20,7 +20,6 @@ public class Station implements XSerializable, ShortID {
     @Override
     public void load(XElement source) {
         id = source.getShort("id");
-        currentEmployee = source.getShort("current-employee");
         machines.clear();
         for (XElement xm : source.childrenWithName("machine")) {
             machines.add(xm.getShort("id"));
@@ -34,7 +33,6 @@ public class Station implements XSerializable, ShortID {
     @Override
     public void save(XElement xout) {
         xout.set("id", id);
-        xout.set("current-employee", currentEmployee);
         ShortIterator si = machines.iterator();
         while (si.hasNext()) {
             XElement xm = xout.add("machine");

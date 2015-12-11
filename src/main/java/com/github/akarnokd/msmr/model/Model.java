@@ -18,7 +18,13 @@ public class Model implements XSerializable {
     
     public final Short2ObjectMap<Routing> routings = new Short2ObjectOpenHashMap<>();
     
-    public final List<Product> products = new ArrayList<>();
+    public final Short2ObjectMap<ShortSet> operationMachines = new Short2ObjectOpenHashMap<>();
+    
+    public final Short2ObjectMap<Product> products = new Short2ObjectOpenHashMap<>();
+    
+    public final List<Product> productIn = new ArrayList<>();
+    public final List<Product> productOut = new ArrayList<>();
+
     
     static <T extends XSerializable & ShortID> void load(XElement source, String groupName, 
             String itemName, Supplier<T> instance,

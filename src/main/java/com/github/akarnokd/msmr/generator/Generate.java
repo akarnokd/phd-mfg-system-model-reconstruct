@@ -3,11 +3,12 @@ package com.github.akarnokd.msmr.generator;
 import java.util.*;
 
 import com.github.akarnokd.msmr.model.*;
+import com.github.akarnokd.msmr.model.Machine.ProcessingType;
 
 import hu.akarnokd.xml.XElement;
 import it.unimi.dsi.fastutil.shorts.*;
 
-public class Generate {
+public final class Generate {
     public long structureSeed;
     
     public long productSeed;
@@ -50,9 +51,12 @@ public class Generate {
                     for (byte n = 0; n < 2; n++) {
                         Employee emp = new Employee();
                         emp.id = empId;
+                        emp.station = i;
                         
                         emp.startDay = (byte)(n == 0 ? 0 : (7 - workingDayCount));
+                        emp.endDay = (byte)(emp.startDay + workingDayCount);
                         emp.startHour = (byte)(k * shiftLength);
+                        emp.endHour = (byte)(emp.startHour + shiftLength);
                         
                         model.employees.put(empId, emp);
                         s.employees.add(empId);
@@ -73,15 +77,18 @@ public class Generate {
             
             model.stations.get((short)sidx).machines.add(i);
             
+            m.station = (short)sidx;
+            
             double mt = structureRandom.nextDouble();
             if (mt < sequentialMachineRatio) {
-                m.sequenceSize = (byte)(1 << (structureRandom.nextInt(maxGroupingPower) + 1));
+                m.capacity = (byte)(1 << (structureRandom.nextInt(maxGroupingPower) + 1));
+                m.processingType = ProcessingType.SEQUENTIAL;
             } else
             if (mt < sequentialMachineRatio + batchMachineRatio) {
-                m.batchSize = (byte)(1 << (structureRandom.nextInt(maxGroupingPower) + 1));
+                m.capacity = (byte)(1 << (structureRandom.nextInt(maxGroupingPower) + 1));
+                m.processingType = ProcessingType.BATCH;
             } else {
-                m.sequenceSize = 1;
-                m.batchSize = 1;
+                m.processingType = ProcessingType.SINGLE;
             }
         }
         
@@ -202,6 +209,19 @@ public class Generate {
             }
         }
         
+        for (Machine m : model.machines.values()) {
+            ShortIterator si = m.operationTimes.keySet().iterator();
+            while (si.hasNext()) {
+                short op = si.nextShort();
+                ShortSet mso = model.operationMachines.get(si);
+                if (mso == null) {
+                    mso = new ShortOpenHashSet();
+                    model.operationMachines.put(op, mso);
+                }
+                mso.add(m.id);
+            }
+        }
+        
         System.out.println("---");
         System.out.printf("Employees: %d%n", model.employees.size());
         model.stations.forEach((s, e) -> System.out.printf("%s: %s%n", s, e.employees));
@@ -212,10 +232,9 @@ public class Generate {
             
             p.type = (short)(productRandom.nextInt(routingCount) + 1);
 
-            model.products.add(p);
+            model.products.put(j, p);
         }
     }
-    
     
     public static void main(String[] args) {
         Generate g = new Generate();
@@ -224,7 +243,7 @@ public class Generate {
         g.machineCount = 50;
         g.routingCount = 1;
         g.operationCount = 40;
-        g.reworkCount = 3;
+        g.reworkCount = 8;
         g.reworkMaxSteps = 2;
         g.sequentialMachineRatio = 0.3;
         g.batchMachineRatio = 0.3;

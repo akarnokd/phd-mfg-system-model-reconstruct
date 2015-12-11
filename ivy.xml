@@ -25,7 +25,7 @@
         status="integration">
     </info>
     <dependencies>
-        <dependency org="com.google.guava" name="guava" rev="18.0" />
+        <dependency org="com.google.guava" name="guava" rev="latest.release" />
         <dependency org="it.unimi.dsi" name="fastutil" rev="latest.release"/>
         <dependency org="org.bouncycastle" name="bcprov-jdk15on" rev="1.50"/>
         <dependency org="org.javassist" name="javassist" rev="3.18.2-GA"/>

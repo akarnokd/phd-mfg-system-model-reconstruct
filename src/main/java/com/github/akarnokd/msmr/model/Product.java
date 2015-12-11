@@ -6,6 +6,9 @@ public class Product implements ShortID, XSerializable {
     public short id;
     public short type;
     
+    public Operation currentOperation;
+    public Machine currentMachine;
+    
     @Override
     public short id() {
         return id;
